@@ -1,0 +1,59 @@
+name: Build, Test, Publish
+
+on: [push]
+
+jobs:
+  test-publish:
+    name: Build, test, and publish package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+        - uses: actions/checkout@v6
+        - run: corepack enable
+        - uses: actions/setup-node@v6
+          with:
+            node-version: 24
+            cache: yarn
+
+        - run: yarn install --immutable
+
+        - run: yarn test:coverage
+        - run: yarn build
+        - run: yarn test:build
+
+        - name: Test in browser (If UMD tests are failing, check torch-bridge.js)
+          run: |
+            yarn serve &
+            npx wait-on tcp:8080
+            npx mocha-headless-chrome -a no-sandbox -t 60000 -f http://127.0.0.1:8080/test/index.html
+            npx mocha-headless-chrome -a no-sandbox -t 60000 -f http://127.0.0.1:8080/test/umd.html
+
+        - name: Build docs and prepare directory
+          run: |
+            yarn docs
+            mkdir -p docs/media
+            [ -d "build" ] && cp -r build docs/build
+            [ -d "build" ] && cp -r build docs/media/build
+            [ -d "examples" ] && cp -r examples docs/examples
+            [ -d "examples" ] && cp -r examples docs/media/examples
+
+        - uses: actions/upload-pages-artifact@v4
+          with:
+            path: './docs'
+
+        - run: yarn pkg-pr-new publish
+
+  deploy-docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    needs: test-publish
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

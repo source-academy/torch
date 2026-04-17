@@ -1,0 +1,84 @@
+{
+  "type": "module",
+  "name": "torch",
+  "packageManager": "yarn@4.10.3",
+  "version": "0.1.0",
+  "description": "machine-learning libraries for Source Academy",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/source-academy/torch.git"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "build",
+    "src",
+    "examples"
+  ],
+  "main": "./build/node/torch.node.cjs",
+  "module": "./build/node/torch.node.es.mjs",
+  "types": "./build/types/index.d.ts",
+  "unpkg": "./build/torch.min.js",
+  "jsdelivr": "./build/torch.min.js",
+  "exports": {
+    ".": {
+      "torch-src": "./src/index.ts",
+      "types": "./build/types/index.d.ts",
+      "browser": "./build/browser/torch.browser.es.js",
+      "import": "./build/node/torch.node.es.mjs",
+      "require": "./build/node/torch.node.cjs"
+    }
+  },
+  "mocha": {
+    "require": "tsx"
+  },
+  "scripts": {
+    "clean": "rimraf build",
+    "build:browser": "vite build --config vite.config.browser.ts",
+    "build:browser:watch": "vite build --config vite.config.browser.ts --watch",
+    "build:node": "vite build --config vite.config.node.ts",
+    "build:node:watch": "vite build --config vite.config.node.ts --watch",
+    "build:cdn": "vite build --config vite.config.cdn.ts",
+    "build:cdn:watch": "vite build --config vite.config.cdn.ts --watch",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build": "yarn clean && concurrently \"yarn build:node\" \"yarn build:browser\" \"yarn build:cdn\" \"yarn build:types\"",
+    "dev": "concurrently \"yarn:build:browser:watch\" \"yarn:build:node:watch\" \"yarn:test:watch\" \"yarn:serve\"",
+    "docs": "typedoc --out docs src",
+    "lint": "eslint src",
+    "serve": "http-server -p 8080 -c-1",
+    "test": "mocha --node-option conditions=torch-src test/**/*.test.ts test/**/*.test.js",
+    "test:build": "mocha test/**/*.test.ts test/**/*.test.js",
+    "test:coverage": "c8 mocha --node-option conditions=torch-src test/**/*.test.ts test/**/*.test.js",
+    "test:watch": "mocha --node-option conditions=torch-src --watch test/**/*.test.ts test/**/*.test.js",
+    "update-tests": "python3 scripts/generate_tests.py > test/testcases.gen.js"
+  },
+  "scriptsComments": {
+    "build": "Builds the library for browser and node.",
+    "dev": "Starts a dev session. Watch and build, test, and serve on localhost:8080",
+    "test": "Tests on code in src/",
+    "test:build": "Tests on built library in build/",
+    "test:coverage": "Provide test coverage",
+    "update-tests": "Updates test using scripts/generate_tests.py to test/testcases.gen.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.6.2",
+    "c8": "^11.0.0",
+    "chai": "^6.2.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.37.0",
+    "eslint-plugin-import": "^2.32.0",
+    "http-server": "^14.1.1",
+    "mocha": "^11.7.4",
+    "pkg-pr-new": "^0.0.62",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vite": "^7.1.9",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

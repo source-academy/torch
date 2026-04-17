@@ -1,0 +1,37 @@
+name: Verify Generated Tests
+
+on: [push]
+
+jobs:
+  verify-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - run: corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: yarn
+
+      - run: yarn install --immutable
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+          cache-dependency-path: scripts/requirements.txt
+
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Sanity Check Generated File Length
+        run: |
+          COMMITTED_LINES=$(wc -l < test/testcases.gen.js)
+          yarn update-tests
+          GENERATED_LINES=$(wc -l < test/testcases.gen.js)
+          if [ "$COMMITTED_LINES" -ne "$GENERATED_LINES" ]; then
+            echo "❌ Line count mismatch! Committed: $COMMITTED_LINES, Generated: $GENERATED_LINES."
+            echo "Please run 'yarn update-tests' locally and commit the updated test file."
+            exit 1
+          fi
+          echo "✅ Line counts match ($COMMITTED_LINES lines). Sanity check passed."
