@@ -170,7 +170,7 @@ class Tensor:
     def squeeze(self, dim=None):
         if dim is None:
             new_shape = [s for s in self.shape if s != 1]
-            return Tensor(self._js.reshape(to_js(new_shape or [1])))
+            return Tensor(self._js.reshape(to_js(new_shape)))
         return Tensor(self._js.squeeze(dim))
 
     def unsqueeze(self, dim):
@@ -302,9 +302,10 @@ class Tensor:
                     )
             return Tensor(result)
         if isinstance(key, slice):
-            start, stop, step = key.indices(self.shape[0])
-            data = [Tensor(self._js.index(i)).tolist() for i in range(start, stop, step)]
-            return Tensor(data)
+            raise NotImplementedError(
+                "Slice indexing is not implemented; converting through Python lists "
+                "would return a detached copy and break tensor/autograd semantics"
+            )
         raise TypeError(f"Invalid index type: {type(key).__name__}")
 
     # ------------------------------------------------------------------
@@ -312,14 +313,15 @@ class Tensor:
     # ------------------------------------------------------------------
 
     def __len__(self):
+        if self.dim() == 0:
+            raise TypeError("len() of a 0-d tensor")
         return self.shape[0]
 
     def __iter__(self):
-        data = self.tolist()
-        if not isinstance(data, list):
+        if self.dim() == 0:
             raise TypeError("iteration over a 0-d tensor")
-        for item in data:
-            yield Tensor(item)
+        for i in range(self.shape[0]):
+            yield self[i]
 
     # ------------------------------------------------------------------
     # Catch-all: delegate unknown attribute accesses to the JS tensor.
@@ -330,6 +332,11 @@ class Tensor:
         if name.startswith('_'):
             raise AttributeError(name)
         def method(*args, **kwargs):
+            if kwargs:
+                raise TypeError(
+                    f"{name}() does not support keyword arguments in this bridge; "
+                    f"got unexpected keyword argument(s): {', '.join(sorted(kwargs.keys()))}"
+                )
             js_args = _transform_args(args)
             return _wrap_result(self._js.__getattribute__(name)(*js_args))
         return method
