@@ -276,6 +276,19 @@ class Tensor:
         return bool(js_torch.allclose(self._js, other._js, rtol, atol, equal_nan))
 
     # ------------------------------------------------------------------
+    # NumPy interop
+    # ------------------------------------------------------------------
+
+    def numpy(self):
+        import numpy as np
+        if self.requires_grad:
+            raise RuntimeError(
+                "Can't call numpy() on Tensor that requires grad. "
+                "Use tensor.detach().numpy() instead."
+            )
+        return np.array(self.tolist())
+
+    # ------------------------------------------------------------------
     # Type conversions
     # ------------------------------------------------------------------
 
@@ -741,6 +754,9 @@ class _Torch:
 
     def is_tensor(self, obj):
         return isinstance(obj, Tensor)
+
+    def from_numpy(self, array):
+        return Tensor(array.tolist())
 
     def is_nonzero(self, input):
         if input.numel() != 1:

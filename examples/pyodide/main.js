@@ -11,8 +11,12 @@ function getPyFiles() {
   return readdirSync(PY_DIR).filter(f => f.endsWith('.py')).sort();
 }
 
+const PYODIDE_PACKAGE_CACHE_DIR = './.pyodide-packages';
+
 async function setupPyodide() {
-  const pyodide = await loadPyodide();
+  if (!existsSync(PYODIDE_PACKAGE_CACHE_DIR)) mkdirSync(PYODIDE_PACKAGE_CACHE_DIR);
+  const pyodide = await loadPyodide({ packageCacheDir: PYODIDE_PACKAGE_CACHE_DIR });
+  await pyodide.loadPackage('numpy');
   pyodide.globals.set('js_torch', torch);
   pyodide.globals.set('_js_is_null', (x) => x == null);
   pyodide.runPython(readFileSync('./bridge.py', 'utf8'));
