@@ -1,6 +1,8 @@
 name: Pyodide Test
 
-on: [push]
+on:
+  pull_request:
+  push:
 
 jobs:
   pyodide-test:

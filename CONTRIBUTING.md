@@ -23,10 +23,10 @@ yarn mocha --node-option conditions=torch-src test/tensor.test.js
 - [`src`](src)
     - [`index.ts`](src/index.ts) is the entry point of the library.
     - [`tensor.ts`](src/tensor.ts) is the main tensor class.
-    - [`functions`](functions) contains all functions that tensors can perform.
-    - [`nn`](nn) contains all neural network modules (for everything under `torch.nn`).
-    - [`optim`](optim) contains all optimizers (for everything under `torch.optim`).
-    - [`creation`](creation) contains all tensor creation functions (all functions that create a tensor not from scratch, including `zeros`, `randn`).
+    - [`functions`](src/functions) contains all functions that tensors can perform.
+    - [`nn`](src/nn) contains all neural network modules (for everything under `torch.nn`).
+    - [`optim`](src/optim) contains all optimizers (for everything under `torch.optim`).
+    - [`creation`](src/creation) contains all tensor creation functions (all functions that create a tensor not from scratch, including `zeros`, `randn`).
 - [`examples`](examples) contains example usages of the library, including on node, on the browser, and using pyodide on the browser.
 - [`test`](test) contains the test cases of the library, including on node and on the browser. See [Testing](#testing).
 
