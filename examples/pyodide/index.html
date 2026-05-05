@@ -19,6 +19,7 @@
                 <option value="py/linear_model.py">linear_model.py</option>
                 <option value="py/training_sgd.py">training_sgd.py</option>
                 <option value="py/custom_module.py">custom_module.py</option>
+                <option value="py/numpy_interop.py">numpy_interop.py</option>
             </select>
         </label>
     </div>
@@ -53,6 +54,8 @@ print("y.grad:", y.grad)
                 if (!window.torch) {
                     throw new Error("torch.js failed to load. Run `yarn build` first.");
                 }
+
+                await pyodide.loadPackage('numpy');
 
                 // Make torch available to Python
                 pyodide.globals.set("js_torch", window.torch);

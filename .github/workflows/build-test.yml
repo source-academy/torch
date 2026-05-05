@@ -1,10 +1,12 @@
-name: Build, Test, Publish
+name: Build and Test
 
-on: [push]
+on:
+  pull_request:
+  push:
 
 jobs:
-  test-publish:
-    name: Build, test, and publish package
+  test:
+    name: Build, test, and prepare docs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,16 +38,15 @@ jobs:
             mkdir -p docs/media
             [ -d "build" ] && cp -r build docs/build
             [ -d "build" ] && cp -r build docs/media/build
-            [ -d "examples" ] && cp -r examples docs/examples
-            [ -d "examples" ] && cp -r examples docs/media/examples
+            [ -d "examples" ] && cp -rL examples docs/examples
+            [ -d "examples" ] && cp -rL examples docs/media/examples
 
         - uses: actions/upload-pages-artifact@v4
           with:
             path: './docs'
 
-        - run: yarn pkg-pr-new publish
-
   deploy-docs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -53,7 +54,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    needs: test-publish
+    needs: test
     steps:
       - uses: actions/deploy-pages@v5
         id: deployment
