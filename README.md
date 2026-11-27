@@ -1,4 +1,6 @@
 # torch
+
+Needs Node 24 (the version in `.node-version`; see the [Node.js version](https://github.com/source-academy/documentation/blob/main/app/docs/developers/node-version.md) page).
 machine-learning libraries for Source Academy
 
 The primary objective of this project is to create a reimplementation of PyTorch in TypeScript, with an educational focus. This project is developed with Source Academy integration in mind.
